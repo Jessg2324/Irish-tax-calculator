@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Irish Tax Calculator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 95%;
+            width: 600px;
+            margin: 20px auto;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 28px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            background-color: #007BFF;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #results {
+            margin-top: 20px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .footer p {
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        .contact-section {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .contact-button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .contact-button:hover {
+            background-color: #218838;
+        }
+
+        .company-name {
+            font-family: 'Times New Roman', serif;
+            font-size: 30px;
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        .company-tagline {
+            font-size: 16px;
+            text-align: center;
+            margin-bottom: 30px;
+            color: #777;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 20px;
+            }
+
+            .company-name {
+                font-size: 24px;
+            }
+
+            .report-table th, .report-table td {
+                font-size: 12px;
+                padding: 6px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                width: 90%;
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 16px;
+            }
+
+            .company-name {
+                font-size: 20px;
+            }
+
+            .report-table th, .report-table td {
+                font-size: 10px;
+                padding: 5px;
+            }
+        }
+
+        /* Table Styling */
+        .report-table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        .report-table th, .report-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .report-table th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="company-name">SmartNest Consulting</div>
+        <div class="company-tagline">Your Trusted Partner in Tax and Finance Consulting</div>
+        <h1>Irish Tax Calculator</h1>
+        <form id="taxForm">
+            <label for="name">Name:</label>
+            <input type="text" id="name" placeholder="Enter your name" required>
+
+            <label for="ppsn">PPSN:</label>
+            <input type="text" id="ppsn" placeholder="Enter your PPSN" required>
+
+            <label for="category">Category:</label>
+            <select id="category" required>
+                <option value="">-- Select --</option>
+                <option value="student">Student</option>
+                <option value="professional">Working Professional</option>
+            </select>
+
+            <label for="wages">Income from Wages (€):</label>
+            <input type="number" id="wages" placeholder="Enter your income from wages" required>
+
+            <label for="otherIncome">Other Income (€):</label>
+            <input type="number" id="otherIncome" placeholder="Enter other income" required>
+
+            <label for="expenses">Claimable Expenses:</label>
+            <div class="expense-list">
+                <label>Tuition Fees (€):</label><input type="number" id="tuitionAmount" placeholder="Enter tuition fee amount" data-limit="7000">
+                <label>Rent (€):</label><input type="number" id="rentAmount" placeholder="Enter rent amount" data-limit="1500">
+                <label>Medical Expenses (€):</label><input type="number" id="medicalAmount" placeholder="Enter medical expense amount" data-limit="1000">
+                <label>Union Fees (€):</label><input type="number" id="unionAmount" placeholder="Enter union fee amount" data-limit="350">
+            </div>
+
+            <button type="button" onclick="calculateTax()">Calculate Tax</button>
+            <button type="button" onclick="exportToPDF()">Export to PDF</button>
+        </form>
+
+        <div id="results"></div>
+
+        <div class="contact-section">
+            <p>If you have any questions, feel free to contact us at:</p>
+            <p>Email: <a href="mailto:SmartNestconsulting@gmail.com">SmartNestconsulting@gmail.com</a></p>
+            <a href="https://www.revenue.ie/en/home.aspx" target="_blank" class="contact-button">Click here to know more about Irish taxation</a>
+        </div>
+    </div>
+
+    <script>
+        function calculateTax() {
+            const wages = parseFloat(document.getElementById("wages").value) || 0;
+            const otherIncome = parseFloat(document.getElementById("otherIncome").value) || 0;
+            const tuitionAmount = parseFloat(document.getElementById("tuitionAmount").value) || 0;
+            const rentAmount = parseFloat(document.getElementById("rentAmount").value) || 0;
+            const medicalAmount = parseFloat(document.getElementById("medicalAmount").value) || 0;
+            const unionAmount = parseFloat(document.getElementById("unionAmount").value) || 0;
+            const category = document.getElementById("category").value;
+
+            // Total income from wages and other income
+            const totalIncome = wages + otherIncome;
+
+            // Total claimable deductions
+            const claimableDeductions = tuitionAmount + rentAmount + medicalAmount + unionAmount;
+
+            // Income before tax
+            const incomeBeforeTax = totalIncome - claimableDeductions;
+
+            // Tax calculation
+            const payeRate = 0.20; // PAYE Tax Rate for Professionals
+            const prsiRate = 0.04; // PRSI Rate
+            const taxCredit = 1775; // Maximum Tax Credit allowed for individuals
+
+            let paye = 0;
+            let prsi = 0;
+
+            if (category === "student") {
+                // Students are taxed at lower rates
+                paye = incomeBeforeTax * 0.15; // Student rate for PAYE
+            } else {
+                paye = incomeBeforeTax * payeRate; // Professional rate for PAYE
+            }
+
+            prsi = incomeBeforeTax * prsiRate; // Always 4% for PRSI
+
+            // Total Tax is the sum of PAYE and PRSI
+            const totalTax = paye + prsi;
+
+            // Gross income after tax deductions
+            const grossIncomeAfterTax = totalIncome - totalTax;
+
+            // Net income after all deductions (including USC)
+            const uscRate = 0.05; // Universal Social Charge (USC)
+            const usc = incomeBeforeTax * uscRate;
+            const netIncome = grossIncomeAfterTax - usc;
+
+            // Calculate total effective tax after applying the tax credit
+            const totalIncomeTax = totalTax - taxCredit;
+
+            // Display results
+            const results = `
+                <h2>Tax Calculation Results</h2>
+                <table class="report-table">
+                    <tr>
+                        <th>Particulars</th>
+                        <th>Amount (€)</th>
+                    </tr>
+                    <tr><td>Name</td><td>${document.getElementById("name").value}</td></tr>
+                    <tr><td>PPSN</td><td>${document.getElementById("ppsn").value}</td></tr>
+                    <tr><td>Income from Wages</td><td>${wages}</td></tr>
+                    <tr><td>Other Income</td><td>${otherIncome}</td></tr>
+                    <tr><td>Claimable Deductions</td><td>${claimableDeductions}</td></tr>
+                    <tr><td>Income Before Tax</td><td>${incomeBeforeTax}</td></tr>
+                    <tr><td>PAYE</td><td>${paye}</td></tr>
+                    <tr><td>PRSI</td><td>${prsi}</td></tr>
+                    <tr><td>USC</td><td>${usc}</td></tr>
+                    <tr><td>Total Tax</td><td>${totalTax}</td></tr>
+                    <tr><td>Effective Tax After Credit</td><td>${totalIncomeTax}</td></tr>
+                    <tr><td>Net Income After Tax</td><td>${netIncome}</td></tr>
+                </table>
+            `;
+            document.getElementById("results").innerHTML = results;
+        }
+
+        function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const name = document.getElementById("name").value;
+            const ppsn = document.getElementById("ppsn").value;
+            const wages = document.getElementById("wages").value;
+            const otherIncome = document.getElementById("otherIncome").value;
+            const tuitionAmount = document.getElementById("tuitionAmount").value;
+            const rentAmount = document.getElementById("rentAmount").value;
+            const medicalAmount = document.getElementById("medicalAmount").value;
+            const unionAmount = document.getElementById("unionAmount").value;
+            const dateTime = new Date().toLocaleString();
+            const taxCredit = 1775;
+
+            // Calculate totals
+            const totalIncome = parseFloat(wages) + parseFloat(otherIncome);
+            const claimableDeductions = parseFloat(tuitionAmount) + parseFloat(rentAmount) + parseFloat(medicalAmount) + parseFloat(unionAmount);
+            const incomeBeforeTax = totalIncome - claimableDeductions;
+            const payeRate = 0.20;
+            const prsiRate = 0.04;
+            const uscRate = 0.05;
+
+            const paye = incomeBeforeTax * payeRate;
+            const prsi = incomeBeforeTax * prsiRate;
+            const usc = incomeBeforeTax * uscRate;
+
+            const totalTax = paye + prsi + usc;
+            const effectiveTax = totalTax - taxCredit;
+            const grossIncomeAfterTax = totalIncome - totalTax;
+            const netIncome = totalIncome - (paye + prsi + usc);
+
+            // Add company name at the top
+            doc.setFont("Times", "normal");
+            doc.setFontSize(40);
+            doc.text("SmartNest Consulting", 105, 20, { align: "center" });
+
+            // Add "Tax Report" centered
+            doc.setFontSize(24);
+            doc.text("Tax Report", 105, 40, { align: "center" });
+
+            // Add details in two columns
+            doc.setFontSize(12);
+            doc.setFont("Helvetica", "normal");
+
+            const particulars = [
+                ["Name", name],
+                ["PPSN", ppsn],
+                ["Income from Wages", wages],
+                ["Other Income", otherIncome],
+                ["Claimable Expenses", claimableDeductions],
+                ["Income Before Tax", incomeBeforeTax],
+                ["PAYE", paye],
+                ["PRSI", prsi],
+                ["USC", usc],
+                ["Total Tax", totalTax],
+                ["Tax Credit", taxCredit],
+                ["Effective Tax After Credit", effectiveTax],
+                ["Gross Income After Tax", grossIncomeAfterTax],
+                ["Net Income", netIncome],
+                ["Date & Time", dateTime],
+            ];
+
+            let yPosition = 60;
+            particulars.forEach((item, index) => {
+                doc.text(item[0], 20, yPosition);
+                doc.text(item[1].toString(), 130, yPosition);
+                yPosition += 10;
+            });
+
+            // Proprietor's name and signature at the end
+            doc.text("Proprietor's Name: Jess Gonsalves", 15, yPosition + 20);
+            doc.text("Signature: __________________________", 15, yPosition + 30);
+
+            // Save the PDF with the file name
+            doc.save('tax_calculation_report.pdf');
+        }
+    </script>
+</body>
+</html>
